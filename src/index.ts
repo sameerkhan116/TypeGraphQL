@@ -2,19 +2,27 @@ import "reflect-metadata";
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
 import { buildSchema } from 'type-graphql';
-import { HelloResolver } from './resolvers';
+import { RegisterResolver } from './modules/user/Register';
+import { createConnection } from "typeorm";
+import { GraphQLSchema } from "graphql";
 
-const PORT = 4000;
+const PORT: number = 4000;
 
-const main = async () => {
-    const schema = await buildSchema({
-        resolvers: [HelloResolver]
+const main = async (): Promise<void> => {
+    // connect to DB (settings in ormconfig.json)
+    await createConnection();
+    // build graphql schema
+    const schema: GraphQLSchema = await buildSchema({
+        resolvers: [RegisterResolver]
     });
-
-    const apolloServer = new ApolloServer({schema});
+    // create ApolloServer with schema
+    const apolloServer: ApolloServer = new ApolloServer({schema});
+    // create express instance
     const app = express();
+    // pass express instance as middleware to apolloServer
     apolloServer.applyMiddleware({ app });
-    app.listen(PORT, () => {
+    //start the server
+    app.listen(PORT, (): void => {
         console.log(`Server started on http://localhost:${PORT}/graphql`)
     });
 }
