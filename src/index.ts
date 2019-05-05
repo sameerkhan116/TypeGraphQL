@@ -2,9 +2,9 @@ import "reflect-metadata";
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
 import { buildSchema } from 'type-graphql';
-import { RegisterResolver } from './modules/user/Register';
 import { createConnection } from "typeorm";
 import { GraphQLSchema } from "graphql";
+import { RegisterResolver } from './modules/user/Register';
 
 const PORT: number = 4000;
 
@@ -16,7 +16,7 @@ const main = async (): Promise<void> => {
         resolvers: [RegisterResolver]
     });
     // create ApolloServer with schema
-    const apolloServer: ApolloServer = new ApolloServer({schema});
+    const apolloServer: ApolloServer = new ApolloServer({ schema });
     // create express instance
     const app = express();
     // pass express instance as middleware to apolloServer
