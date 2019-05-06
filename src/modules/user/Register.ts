@@ -3,7 +3,7 @@ import { Resolver, Query, Mutation, Arg } from "type-graphql";
 import { User } from "../../entity/User";
 import { RegisterInput } from './register/RegisterInput';
 
-@Resolver(User)
+@Resolver()
 export class RegisterResolver {
     @Query(() => String)
     async hello(): Promise<String> {

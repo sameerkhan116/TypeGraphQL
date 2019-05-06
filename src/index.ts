@@ -4,21 +4,58 @@ import * as express from 'express';
 import { buildSchema } from 'type-graphql';
 import { createConnection } from "typeorm";
 import { GraphQLSchema } from "graphql";
+import * as session from 'express-session';
+import * as connectRedis from 'connect-redis';
 import { RegisterResolver } from './modules/user/Register';
+import * as cors from 'cors';
+import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
+import { LoginResolver } from "./modules/user/Login";
+import { redis } from "./redis";
+import { MeResolver } from "./modules/user/Me";
 
 const PORT: number = 4000;
 
+
 const main = async (): Promise<void> => {
     // connect to DB (settings in ormconfig.json)
-    await createConnection();
+    try {
+        await createConnection();
+    } catch(error) { // handling promise rejection
+        console.log(error);
+    }
     // build graphql schema
     const schema: GraphQLSchema = await buildSchema({
-        resolvers: [RegisterResolver]
+        resolvers: [RegisterResolver, LoginResolver, MeResolver]
     });
     // create ApolloServer with schema
-    const apolloServer: ApolloServer = new ApolloServer({ schema });
+    const apolloServer: ApolloServer = new ApolloServer({ 
+        schema,
+        context: ({ req }: ExpressContext) => ({ req }) 
+    });
     // create express instance
     const app = express();
+    const RedisStore: connectRedis.RedisStore = connectRedis(session);
+    // apply this middleware before we reach resolvers
+    app.use(
+        session({
+            store: new RedisStore({
+                client: redis as any
+            }),
+            name: "qid",
+            secret: "sajkh3214jkjl",
+            resave: false,
+            saveUninitialized: false,
+            cookie: {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === "production",
+                maxAge: 1000 * 60 * 60 * 24 * 7 * 365
+            }
+        })
+    );
+    app.use(cors({
+        credentials: true,
+        origin: '*'
+    }));
     // pass express instance as middleware to apolloServer
     apolloServer.applyMiddleware({ app });
     //start the server
