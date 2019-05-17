@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
-import { buildSchema } from 'type-graphql';
+import { buildSchema, ResolverData } from 'type-graphql';
 import { createConnection } from "typeorm";
 import { GraphQLSchema } from "graphql";
 import * as session from 'express-session';
@@ -25,7 +25,10 @@ const main = async (): Promise<void> => {
     }
     // build graphql schema
     const schema: GraphQLSchema = await buildSchema({
-        resolvers: [RegisterResolver, LoginResolver, MeResolver]
+        resolvers: [RegisterResolver, LoginResolver, MeResolver],
+        authChecker: ({ context: { req } }: ResolverData<ExpressContext>): boolean => {
+            return req.session.userId !== null;
+        }
     });
     // create ApolloServer with schema
     const apolloServer: ApolloServer = new ApolloServer({ 
