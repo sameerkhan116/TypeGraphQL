@@ -12,7 +12,7 @@ export class LoginResolver {
         @Ctx() ctx: IMyContext
     ): Promise<User | null> {
         const user = await User.findOne({ where: { email } });
-        if(!user) return null;
+        if(!user || !user.confirmed) return null;
         const valid = bcrypt.compare(password, user.password);
         if(!valid) return null;
         ctx.req.session!.userId = user.id;

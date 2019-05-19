@@ -12,6 +12,7 @@ import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 import { LoginResolver } from "./modules/user/Login";
 import { redis } from "./redis";
 import { MeResolver } from "./modules/user/Me";
+import { ConfirmUserResolver } from "./modules/user/ConfirmUser";
 
 const PORT: number = 4000;
 
@@ -25,7 +26,7 @@ const main = async (): Promise<void> => {
     }
     // build graphql schema
     const schema: GraphQLSchema = await buildSchema({
-        resolvers: [RegisterResolver, LoginResolver, MeResolver],
+        resolvers: [RegisterResolver, LoginResolver, MeResolver, ConfirmUserResolver],
         authChecker: ({ context: { req } }: ResolverData<ExpressContext>): boolean => {
             return req.session.userId !== null;
         }
