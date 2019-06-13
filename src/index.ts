@@ -6,13 +6,9 @@ import { createConnection } from "typeorm";
 import { GraphQLSchema } from "graphql";
 import * as session from 'express-session';
 import * as connectRedis from 'connect-redis';
-import { RegisterResolver } from './modules/user/Register';
 import * as cors from 'cors';
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
-import { LoginResolver } from "./modules/user/Login";
 import { redis } from "./redis";
-import { MeResolver } from "./modules/user/Me";
-import { ConfirmUserResolver } from "./modules/user/ConfirmUser";
 
 const PORT: number = 4000;
 
@@ -26,7 +22,7 @@ const main = async (): Promise<void> => {
     }
     // build graphql schema
     const schema: GraphQLSchema = await buildSchema({
-        resolvers: [RegisterResolver, LoginResolver, MeResolver, ConfirmUserResolver],
+        resolvers: [__dirname + '/modules/**/*.ts'],
         authChecker: ({ context: { req } }: ResolverData<ExpressContext>): boolean => {
             return req.session.userId !== null;
         }
