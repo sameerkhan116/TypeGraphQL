@@ -30,7 +30,7 @@ const main = async (): Promise<void> => {
     // create ApolloServer with schema
     const apolloServer: ApolloServer = new ApolloServer({ 
         schema,
-        context: ({ req }: ExpressContext) => ({ req }) 
+        context: ({ req, res }: ExpressContext) => ({ req, res }) 
     });
     // create express instance
     const app = express();
