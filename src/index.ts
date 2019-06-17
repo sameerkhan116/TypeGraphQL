@@ -1,7 +1,6 @@
 import "reflect-metadata";
 import { ApolloServer } from 'apollo-server-express';
 import * as express from 'express';
-import { buildSchema, ResolverData } from 'type-graphql';
 import { createConnection } from "typeorm";
 import { GraphQLSchema } from "graphql";
 import * as session from 'express-session';
@@ -9,6 +8,7 @@ import * as connectRedis from 'connect-redis';
 import * as cors from 'cors';
 import { ExpressContext } from "apollo-server-express/dist/ApolloServer";
 import { redis } from "./redis";
+import { createSchema } from "./createSchema";
 
 const PORT: number = 4000;
 
@@ -21,12 +21,7 @@ const main = async (): Promise<void> => {
         console.log(error);
     }
     // build graphql schema
-    const schema: GraphQLSchema = await buildSchema({
-        resolvers: [__dirname + '/modules/**/*.ts'],
-        authChecker: ({ context: { req } }: ResolverData<ExpressContext>): boolean => {
-            return req.session.userId !== null;
-        }
-    });
+    const schema: GraphQLSchema = await createSchema();
     // create ApolloServer with schema
     const apolloServer: ApolloServer = new ApolloServer({ 
         schema,
